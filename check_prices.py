@@ -54,7 +54,8 @@ def fetch_item_data():
         if price < target['limit']:
             results.append({
                 'title': title,
-                'price': price
+                'url': target['url'],
+                'price': str(price)
             })
     driver.close()
     return results
@@ -62,5 +63,5 @@ def fetch_item_data():
 if __name__ == '__main__':
     results = fetch_item_data()
     for result in results:
-        text = '{0}\n{1}'.format(result['title'], result['price'])
+        text = '\n'.join([result['title'], result['url'], '¥' + result['price']])
         create_broad_cast_message(text)
