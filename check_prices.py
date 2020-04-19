@@ -5,7 +5,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -37,7 +37,11 @@ def fetch_item_data():
     f.close()
     options = Options()
     options.add_argument('--headless')
-    driver = webdriver.Chrome(chrome_options=options)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('disable-infobars')
+    options.add_argument('--disable-extensions')
+    driver = webdriver.Firefox(firefox_options=options)
     results = []
     for target in targets:
         driver.get(target['url'])
