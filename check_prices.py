@@ -10,12 +10,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-dirname = os.path.dirname(__file__)
-config = configparser.ConfigParser()
-config.read('{}config.ini'.format(dirname))
-channel_access_token = config['DEFAULT']['CHANNEL_ACCESS_TOKEN']
-
 def create_broad_cast_message(text):
+    dirname = os.path.dirname(__file__)
+    config = configparser.ConfigParser()
+    config.read(os.path.join(dirname, 'config.ini'))
+    channel_access_token = config['DEFAULT']['CHANNEL_ACCESS_TOKEN']
     url = 'https://api.line.me/v2/bot/message/broadcast'
     headers = {
         'Content-Type': 'application/json',
@@ -32,6 +31,7 @@ def create_broad_cast_message(text):
     requests.post(url, data=json.dumps(data), headers=headers)
 
 def fetch_item_data():
+    dirname = os.path.dirname(__file__)
     f = open('{}targets.json'.format(dirname))
     targets = json.loads(f.read())['targets']
     f.close()
