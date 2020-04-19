@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone, timedelta
 import re
 import configparser
 import json
@@ -32,9 +33,18 @@ def create_broad_cast_message(text):
 
 def fetch_item_data():
     dirname = os.path.dirname(__file__)
-    f = open('{}targets.json'.format(dirname))
+    f = open(os.path.join(dirname, 'targets.json'))
     targets = json.loads(f.read())['targets']
     f.close()
+    histories_file_path = os.path.join(dirname, 'histories.json')
+    if not os.path.isfile(histories_file_path):
+        with open(histories_file_path, mode='w') as f:
+            pass
+    f = open(histories_file_path)
+    text = f.read()
+    histories = json.loads(text)['histories'] if 0 < len(text) else {}
+    f.close()
+
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -43,7 +53,14 @@ def fetch_item_data():
     options.add_argument('--disable-extensions')
     driver = webdriver.Firefox(firefox_options=options)
     results = []
+    new_histories = {'histories': {}}
+    now = datetime.now(timezone.utc)
     for target in targets:
+        if target['url'] in histories.keys()\
+           and now - timedelta(hours=1) <\
+               datetime.strptime(histories[target['url']], '%Y-%m-%d %H:%M:%S%z'):
+                new_histories['histories'][target['url']] = histories[target['url']]
+                continue
         driver.get(target['url'])
         WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.ID, 'productTitle'))
@@ -61,6 +78,9 @@ def fetch_item_data():
                 'url': target['url'],
                 'price': str(price)
             })
+            new_histories['histories'][target['url']] = now.strftime('%Y-%m-%d %H:%M:%S%z')
+    with open(histories_file_path, mode='w') as f:
+        f.write(json.dumps(new_histories))
     driver.close()
     return results
 
