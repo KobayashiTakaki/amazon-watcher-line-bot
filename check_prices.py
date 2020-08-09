@@ -55,6 +55,8 @@ def fetch_item_data():
     results = []
     new_histories = {'histories': {}}
     now = datetime.now(timezone.utc)
+    price_elem_selector = '#price #priceblock_ourprice_row #priceblock_ourprice'
+
     for target in targets:
         if target['url'] in histories.keys()\
            and now - timedelta(hours=1) <\
@@ -70,7 +72,7 @@ def fetch_item_data():
         )
         soup = BeautifulSoup(driver.page_source, "html.parser")
         title = soup.find(id='productTitle').text.strip()
-        price_text = soup.select('#addToCart span[class*=price]')[0].text
+        price_text = soup.select(price_elem_selector)[0].text
         price = int(re.sub(r'[^0-9]', '', price_text))
         if price < target['limit']:
             results.append({
