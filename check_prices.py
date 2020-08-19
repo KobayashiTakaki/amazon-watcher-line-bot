@@ -40,6 +40,20 @@ def create_broad_cast_message(text):
     }
     requests.post(url, data=json.dumps(data), headers=headers)
 
+def fetch_amazon_data(url, driver):
+    driver.get(url)
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.ID, 'productTitle'))
+    )
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.ID, 'addToCart'))
+    )
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    title = soup.find(id='productTitle').text.strip()
+    price_text = soup.select('#price #priceblock_ourprice_row #priceblock_ourprice')[0].text
+    price = int(re.sub(r'[^0-9]', '', price_text))
+    return { 'title': title, 'price': price }
+
 def fetch_item_data():
     dirname = os.path.dirname(__file__)
     f = open(os.path.join(dirname, 'targets.json'))
@@ -58,7 +72,6 @@ def fetch_item_data():
     results = []
     new_histories = {'histories': {}}
     now = datetime.now(timezone.utc)
-    price_elem_selector = '#price #priceblock_ourprice_row #priceblock_ourprice'
 
     for target in targets:
         if target['url'] in histories.keys()\
@@ -66,22 +79,12 @@ def fetch_item_data():
                datetime.strptime(histories[target['url']], '%Y-%m-%d %H:%M:%S%z'):
                 new_histories['histories'][target['url']] = histories[target['url']]
                 continue
-        driver.get(target['url'])
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.ID, 'productTitle'))
-        )
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.ID, 'addToCart'))
-        )
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        title = soup.find(id='productTitle').text.strip()
-        price_text = soup.select(price_elem_selector)[0].text
-        price = int(re.sub(r'[^0-9]', '', price_text))
-        if price < target['limit']:
+        data = fetch_amazon_data(target['url'], driver)
+        if data['price'] < target['limit']:
             results.append({
-                'title': title,
+                'title': data['title'],
                 'url': target['url'],
-                'price': str(price)
+                'price': str(data['price'])
             })
             new_histories['histories'][target['url']] = now.strftime('%Y-%m-%d %H:%M:%S%z')
     with open(histories_file_path, mode='w') as f:
