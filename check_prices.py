@@ -43,10 +43,10 @@ def create_broad_cast_message(text):
 def fetch_amazon_data(url, driver):
     driver.get(url)
     WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.ID, 'productTitle'))
+        EC.presence_of_element_located((By.ID, 'productTitle'))
     )
     WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.ID, 'addToCart'))
+        EC.presence_of_element_located((By.ID, 'addToCart'))
     )
     soup = BeautifulSoup(driver.page_source, "html.parser")
     title = soup.find(id='productTitle').text.strip()
