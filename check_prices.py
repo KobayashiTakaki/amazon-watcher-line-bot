@@ -11,6 +11,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+def firefox_driver():
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('disable-infobars')
+    options.add_argument('--disable-extensions')
+    return webdriver.Firefox(firefox_options=options)
+
 def create_broad_cast_message(text):
     dirname = os.path.dirname(__file__)
     config = configparser.ConfigParser()
@@ -45,13 +54,7 @@ def fetch_item_data():
     histories = json.loads(text)['histories'] if 0 < len(text) else {}
     f.close()
 
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('disable-infobars')
-    options.add_argument('--disable-extensions')
-    driver = webdriver.Firefox(firefox_options=options)
+    driver = firefox_driver()
     results = []
     new_histories = {'histories': {}}
     now = datetime.now(timezone.utc)
