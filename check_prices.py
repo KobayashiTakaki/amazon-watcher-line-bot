@@ -54,6 +54,17 @@ def fetch_amazon_data(url, driver):
     price = int(re.sub(r'[^0-9]', '', price_text))
     return { 'title': title, 'price': price }
 
+def fetch_rakuten_data(url, driver):
+    driver.get(url)
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, 'searchresultitem'))
+    )
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    title = soup.select_one('.searchresultitems .searchresultitem .title h2 a').text
+    price_text = soup.select_one('.searchresultitems .searchresultitem .price span').text
+    price = int(re.sub(r'[^0-9]', '', price_text))
+    return { 'title': title, 'price': price }
+
 def fetch_item_data():
     dirname = os.path.dirname(__file__)
     f = open(os.path.join(dirname, 'targets.json'))
@@ -79,7 +90,10 @@ def fetch_item_data():
                datetime.strptime(histories[target['url']], '%Y-%m-%d %H:%M:%S%z'):
                 new_histories['histories'][target['url']] = histories[target['url']]
                 continue
-        data = fetch_amazon_data(target['url'], driver)
+        if 'amazon.co.jp' in target['url']:
+            data = fetch_amazon_data(target['url'], driver)
+        if 'rakuten.co.jp' in target['url']:
+            data = fetch_rakuten_data(target['url'], driver)
         if data['price'] < target['limit']:
             results.append({
                 'title': data['title'],
