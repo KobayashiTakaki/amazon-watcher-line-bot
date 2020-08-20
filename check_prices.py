@@ -52,7 +52,7 @@ def fetch_amazon_data(url, driver):
     title = soup.find(id='productTitle').text.strip()
     price_text = soup.select('#price #priceblock_ourprice_row #priceblock_ourprice')[0].text
     price = int(re.sub(r'[^0-9]', '', price_text))
-    return { 'title': title, 'price': price }
+    return { 'title': title, 'price': price, 'url': url }
 
 def fetch_rakuten_data(url, driver):
     driver.get(url)
@@ -60,10 +60,12 @@ def fetch_rakuten_data(url, driver):
         EC.presence_of_element_located((By.CLASS_NAME, 'searchresultitem'))
     )
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    title = soup.select_one('.searchresultitems .searchresultitem .title h2 a').text
+    link_elem = soup.select_one('.searchresultitems .searchresultitem .title h2 a')
+    title = link_elem.text
+    url = link_elem.get('href')
     price_text = soup.select_one('.searchresultitems .searchresultitem .price span').text
     price = int(re.sub(r'[^0-9]', '', price_text))
-    return { 'title': title, 'price': price }
+    return { 'title': title, 'price': price, 'url': url }
 
 def fetch_item_data():
     dirname = os.path.dirname(__file__)
@@ -97,7 +99,7 @@ def fetch_item_data():
         if data['price'] < target['limit']:
             results.append({
                 'title': data['title'],
-                'url': target['url'],
+                'url': data['url'],
                 'price': str(data['price'])
             })
             new_histories['histories'][target['url']] = now.strftime('%Y-%m-%d %H:%M:%S%z')
