@@ -88,7 +88,7 @@ def fetch_item_data():
 
     for target in targets:
         if target['url'] in histories.keys()\
-           and now - timedelta(hours=1) <\
+           and now - timedelta(hours=3) <\
                datetime.strptime(histories[target['url']], '%Y-%m-%d %H:%M:%S%z'):
                 new_histories['histories'][target['url']] = histories[target['url']]
                 continue
