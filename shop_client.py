@@ -90,7 +90,7 @@ class ShopClient:
                     with open(results_file_path, mode='w') as f:
                         f.write(json.dumps(results))
                         f.flush()
-                else:
+                elif target['id'] in results.keys():
                     del results[target['id']]
                     with open(results_file_path, mode='w') as f:
                         f.write(json.dumps(results))
