@@ -78,7 +78,7 @@ class ShopClient:
                         data = self.fetch_rakuten_data(target['url'])
                 except TimeoutException:
                     print('waiting for page loading timeout.')
-                    pass
+                    continue
 
                 if data['price'] < target['limit']:
                     results[target['id']] = {
